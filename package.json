@@ -1,0 +1,16 @@
+{
+  "author": "lambdalisue <lambdalisue@hashnote.net>",
+  "name": "coffee-algebra",
+  "version": "0.0.0",
+  "repository": {
+    "url": ""
+  },
+  "engines": {
+    "node": "~v0.5.5"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "nodeunit": ">=0.5.0",
+    "coffee-script":">=1.1.1"
+  }
+}
