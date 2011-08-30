@@ -1,0 +1,378 @@
+<!DOCTYPE html>  <html> <head>   <title>algebra.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               algebra.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="k">class</span> <span class="nx">AccessorPropertyObject</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>Ref: https://github.com/jashkenas/coffee-script/issues/1039</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="vi">@get: </span><span class="nf">(propertyName, func) -&gt;</span>
+        <span class="nb">Object</span><span class="p">.</span><span class="nx">defineProperty</span> <span class="err">@</span><span class="o">::</span><span class="p">,</span> <span class="nx">propertyName</span><span class="p">,</span>
+            <span class="nv">configurable: </span><span class="kc">true</span>
+            <span class="nv">enumerable: </span><span class="kc">true</span>
+            <span class="nv">get: </span><span class="nx">func</span>
+    <span class="vi">@set: </span><span class="nf">(propertyName, func) -&gt;</span>
+        <span class="nb">Object</span><span class="p">.</span><span class="nx">defineProperty</span> <span class="err">@</span><span class="o">::</span><span class="p">,</span> <span class="nx">propertyName</span><span class="p">,</span>
+            <span class="nv">configurable: </span><span class="kc">true</span>
+            <span class="nv">enumerable: </span><span class="kc">true</span>
+            <span class="nv">set: </span><span class="nx">func</span>
+
+<span class="nv">sum = </span><span class="nf">(a) -&gt;</span>
+    <span class="k">if</span> <span class="nx">a</span><span class="p">.</span><span class="nx">length</span> <span class="o">is</span> <span class="mi">0</span> <span class="k">then</span> <span class="k">return</span> <span class="mi">0</span>
+    <span class="nx">a</span><span class="p">.</span><span class="nx">reduce</span> <span class="nf">(lhs, rhs) -&gt;</span> <span class="p">(</span><span class="nx">lhs</span> <span class="o">+</span> <span class="nx">rhs</span><span class="p">)</span>
+<span class="nv">max = </span><span class="nf">(a) -&gt;</span>
+    <span class="k">if</span> <span class="nx">a</span><span class="p">.</span><span class="nx">length</span> <span class="o">is</span> <span class="mi">0</span> <span class="k">then</span> <span class="k">return</span> <span class="mi">0</span>
+    <span class="nx">a</span><span class="p">.</span><span class="nx">reduce</span> <span class="nf">(lhs, rhs) -&gt;</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">max</span> <span class="nx">lhs</span><span class="p">,</span> <span class="nx">rhs</span>
+<span class="nv">flatten = </span><span class="nf">(a) -&gt;</span>
+    <span class="k">if</span> <span class="nx">a</span><span class="p">.</span><span class="nx">length</span> <span class="o">is</span> <span class="mi">0</span> <span class="k">then</span> <span class="k">return</span> <span class="p">[]</span>
+    <span class="nx">a</span><span class="p">.</span><span class="nx">reduce</span> <span class="nf">(lhs, rhs) -&gt;</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">concat</span> <span class="nx">rhs</span>
+<span class="nv">pad = </span><span class="nf">(str, n, letter=0) -&gt;</span>
+    <span class="nv">offset = </span><span class="nx">n</span> <span class="o">-</span> <span class="nx">str</span><span class="p">.</span><span class="nx">toString</span><span class="p">().</span><span class="nx">length</span>
+    <span class="k">if</span> <span class="nx">offset</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="nv">leading = </span><span class="nb">Array</span><span class="p">(</span><span class="nx">offset</span><span class="o">+</span><span class="mi">1</span><span class="p">).</span><span class="nx">join</span> <span class="nx">letter</span>
+        <span class="s2">&quot;#{leading}#{str}&quot;</span>
+    <span class="k">else</span>
+        <span class="nx">str</span>
+
+<span class="nv">exports.Matrix = </span><span class="k">class</span> <span class="nx">Matrix</span> <span class="k">extends</span> <span class="nx">AccessorPropertyObject</span>
+    <span class="nv">constructor: </span><span class="nf">(entries) -&gt;</span>
+        <span class="k">if</span> <span class="nx">entries</span><span class="p">.</span><span class="nx">length</span> <span class="o">is</span> <span class="mi">1</span> <span class="o">and</span> <span class="nx">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">not</span> <span class="k">instanceof</span> <span class="nb">Array</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;it is not matrix but scalar&quot;</span>
+        <span class="vi">@_entries = </span><span class="nx">entries</span>
+
+    <span class="nx">@get</span> <span class="s1">&#39;entries&#39;</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="nx">@_entries</span>
+    <span class="nx">@get</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="nx">@entries</span><span class="p">.</span><span class="nx">length</span>        <span class="c1"># Height (The number of rows)</span>
+    <span class="nx">@get</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="nx">@entries</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">length</span>     <span class="c1"># Width (The number of columns)</span>
+
+    <span class="nv">get: </span><span class="nf">(i, j, def=null) -&gt;</span> 
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">@m</span> <span class="o">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="nx">j</span> <span class="o">&lt;</span> <span class="nx">@n</span>
+            <span class="k">return</span> <span class="nx">@entries</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="nx">j</span><span class="p">]</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="nx">def</span><span class="o">?</span>
+            <span class="k">return</span> <span class="nx">def</span>
+        <span class="k">else</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: (#{i}, #{j}) is out of range.&quot;</span>
+    <span class="nv">set: </span><span class="nf">(i, j, value) -&gt;</span> 
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">@m</span> <span class="o">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="nx">j</span> <span class="o">&lt;</span> <span class="nx">@n</span>
+            <span class="nx">@entries</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="nx">j</span><span class="p">]</span> <span class="o">=</span> <span class="nx">value</span>
+        <span class="k">else</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: (#{i}, #{j}) is out of range.&quot;</span>
+
+    <span class="nv">row: </span><span class="nf">(i) -&gt;</span> <span class="nx">@entries</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+    <span class="nv">column: </span><span class="nf">(j) -&gt;</span> <span class="p">(</span><span class="nx">row</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="k">for</span> <span class="nx">row</span> <span class="k">in</span> <span class="nx">@entries</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>Return an one-dimensional array</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">toArray: </span><span class="o">-&gt;</span> <span class="nx">flatten</span> <span class="nx">@entries</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>Return human readable string</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">toString: </span><span class="o">-&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>find longest length of entries</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nv">longest = </span><span class="p">(</span><span class="nx">max</span> <span class="nx">@toArray</span><span class="p">()).</span><span class="nx">toString</span><span class="p">().</span><span class="nx">length</span>
+
+        <span class="nv">rows = </span><span class="p">[]</span>
+        <span class="k">for</span> <span class="nx">row</span> <span class="k">in</span> <span class="nx">@entries</span>
+            <span class="nv">prow = </span><span class="p">(</span><span class="nx">pad</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span> <span class="nx">longest</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="k">for</span> <span class="nx">e</span> <span class="k">in</span> <span class="nx">row</span><span class="p">)</span>
+            <span class="nx">rows</span><span class="p">.</span><span class="nx">push</span> <span class="s2">&quot;| #{prow.join &#39; &#39;} |&quot;</span>
+        <span class="k">return</span> <span class="nx">rows</span><span class="p">.</span><span class="nx">join</span> <span class="s1">&#39;\n&#39;</span>
+
+    <span class="nv">isSquare: </span><span class="o">-&gt;</span> <span class="nx">@m</span> <span class="o">is</span> <span class="nx">@n</span>
+    <span class="nv">isDiagonal: </span><span class="o">-&gt;</span>
+        <span class="k">if</span> <span class="o">not</span> <span class="nx">@isSquare</span><span class="p">()</span> <span class="k">then</span> <span class="k">return</span> <span class="kc">false</span>
+        <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">@m</span><span class="p">]</span>
+            <span class="k">for</span> <span class="nx">j</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">@n</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nx">i</span> <span class="o">is</span> <span class="nx">j</span> <span class="k">then</span> <span class="k">continue</span>
+                <span class="k">if</span> <span class="nx">@get</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="p">)</span> <span class="o">isnt</span> <span class="mi">0</span> <span class="k">then</span> <span class="k">return</span> <span class="kc">false</span>
+        <span class="k">return</span> <span class="kc">true</span>
+    <span class="nv">isIdentity: </span><span class="o">-&gt;</span>
+        <span class="k">if</span> <span class="o">not</span> <span class="p">(</span><span class="nx">@isSquare</span><span class="p">()</span> <span class="o">and</span> <span class="nx">@isDiagonal</span><span class="p">())</span> <span class="k">then</span> <span class="k">return</span> <span class="kc">false</span>
+        <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">@m</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nx">@get</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="o">isnt</span> <span class="mi">1</span> <span class="k">then</span> <span class="k">return</span> <span class="kc">false</span>
+        <span class="k">return</span> <span class="kc">true</span>
+    <span class="nv">isSymmetric: </span><span class="o">-&gt;</span>
+        <span class="nv">transpose = </span><span class="nx">@transpose</span><span class="p">()</span>
+        <span class="nx">@compare</span> <span class="nx">transpose</span>
+    <span class="nv">isSkewSymmetric: </span><span class="o">-&gt;</span>
+        <span class="nv">transpose = </span><span class="nx">@transpose</span><span class="p">()</span>
+        <span class="nx">@compare</span> <span class="nx">transpose</span><span class="p">.</span><span class="nx">multiple</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="nv">compare: </span><span class="nf">(matrix) -&gt;</span>
+        <span class="nx">Matrix</span><span class="p">.</span><span class="nx">compare</span> <span class="err">@</span><span class="p">,</span> <span class="nx">matrix</span>
+    <span class="vi">@compare: </span><span class="nf">(lhs, rhs) -&gt;</span>
+        <span class="k">if</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">m</span> <span class="o">isnt</span> <span class="nx">rhs</span><span class="p">.</span><span class="nx">m</span> <span class="o">or</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">n</span> <span class="o">isnt</span> <span class="nx">rhs</span><span class="p">.</span><span class="nx">n</span>
+            <span class="k">return</span> <span class="kc">false</span>
+        <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">m</span><span class="p">]</span>
+            <span class="k">for</span> <span class="nx">j</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">n</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="p">)</span> <span class="o">isnt</span> <span class="nx">rhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="p">)</span> <span class="k">then</span> <span class="k">return</span> <span class="kc">false</span>
+        <span class="k">return</span> <span class="kc">true</span>
+    <span class="nv">plus: </span><span class="nf">(rhs) -&gt;</span>
+        <span class="nx">Matrix</span><span class="p">.</span><span class="nx">plus</span> <span class="err">@</span><span class="p">,</span> <span class="nx">rhs</span>
+    <span class="vi">@plus: </span><span class="nf">(lhs, rhs) -&gt;</span>
+        <span class="k">if</span> <span class="nx">lhs</span> <span class="o">not</span> <span class="k">instanceof</span> <span class="nx">Matrix</span> <span class="o">or</span> <span class="nx">rhs</span> <span class="o">not</span> <span class="k">instanceof</span> <span class="nx">Matrix</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: lhs and rhs must be an instance of Matrix&quot;</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">m</span> <span class="o">isnt</span> <span class="nx">rhs</span><span class="p">.</span><span class="nx">m</span> <span class="o">or</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">n</span> <span class="o">isnt</span> <span class="nx">rhs</span><span class="p">.</span><span class="nx">n</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: cannot plus two matrix which has different type&quot;</span>
+        <span class="nv">newMatrix = </span><span class="p">[]</span>
+        <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">m</span><span class="p">]</span>
+            <span class="nv">row = </span><span class="p">[]</span>
+            <span class="k">for</span> <span class="nx">j</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">n</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="nx">j</span><span class="p">)</span> <span class="o">+</span> <span class="nx">rhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="nx">j</span><span class="p">))</span>
+            <span class="nx">newMatrix</span><span class="p">.</span><span class="nx">push</span> <span class="nx">row</span>
+        <span class="k">new</span> <span class="nx">Matrix</span> <span class="nx">newMatrix</span>
+    <span class="nv">minus: </span><span class="nf">(rhs) -&gt;</span>
+        <span class="nx">Matrix</span><span class="p">.</span><span class="nx">minus</span> <span class="err">@</span><span class="p">,</span> <span class="nx">rhs</span>
+    <span class="vi">@minus: </span><span class="nf">(lhs, rhs) -&gt;</span>
+        <span class="k">if</span> <span class="nx">lhs</span> <span class="o">not</span> <span class="k">instanceof</span> <span class="nx">Matrix</span> <span class="o">or</span> <span class="nx">rhs</span> <span class="o">not</span> <span class="k">instanceof</span> <span class="nx">Matrix</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: lhs and rhs must be an instance of Matrix&quot;</span>
+        <span class="k">if</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">m</span> <span class="o">isnt</span> <span class="nx">rhs</span><span class="p">.</span><span class="nx">m</span> <span class="o">or</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">n</span> <span class="o">isnt</span> <span class="nx">rhs</span><span class="p">.</span><span class="nx">n</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: cannot minus two matrix which has different type&quot;</span>
+        <span class="nv">newMatrix = </span><span class="p">[]</span>
+        <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">m</span><span class="p">]</span>
+            <span class="nv">row = </span><span class="p">[]</span>
+            <span class="k">for</span> <span class="nx">j</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">n</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="nx">j</span><span class="p">)</span> <span class="o">-</span> <span class="nx">rhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="nx">j</span><span class="p">))</span>
+            <span class="nx">newMatrix</span><span class="p">.</span><span class="nx">push</span> <span class="nx">row</span>
+        <span class="k">new</span> <span class="nx">Matrix</span> <span class="nx">newMatrix</span>
+    <span class="vi">@multipleScalar: </span><span class="nf">(lhs, rhs) -&gt;</span>
+        <span class="k">if</span> <span class="nx">lhs</span> <span class="k">instanceof</span> <span class="nx">Matrix</span> <span class="o">and</span> <span class="k">typeof</span> <span class="nx">rhs</span> <span class="o">is</span> <span class="s2">&quot;number&quot;</span>
+            <span class="nv">matrix = </span><span class="nx">lhs</span>
+            <span class="nv">scalar = </span><span class="nx">rhs</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="nx">rhs</span> <span class="k">instanceof</span> <span class="nx">Matrix</span> <span class="o">and</span> <span class="k">typeof</span> <span class="nx">lhs</span> <span class="o">is</span> <span class="s2">&quot;number&quot;</span>
+            <span class="nv">matrix = </span><span class="nx">rhs</span>
+            <span class="nv">scalar = </span><span class="nx">lhs</span>
+        <span class="k">else</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: unknown object has passed&quot;</span>
+        <span class="nv">newMatrix = </span><span class="p">[]</span>
+        <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">m</span><span class="p">]</span>
+            <span class="nv">row = </span><span class="p">[]</span>
+            <span class="k">for</span> <span class="nx">j</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">n</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="nx">j</span><span class="p">)</span> <span class="o">*</span> <span class="nx">scalar</span><span class="p">)</span>
+            <span class="nx">newMatrix</span><span class="p">.</span><span class="nx">push</span> <span class="nx">row</span>
+        <span class="k">new</span> <span class="nx">Matrix</span> <span class="nx">newMatrix</span>
+    <span class="vi">@multipleMatrix: </span><span class="nf">(lhs, rhs) -&gt;</span>
+        <span class="k">if</span> <span class="nx">lhs</span> <span class="o">not</span> <span class="k">instanceof</span> <span class="nx">Matrix</span> <span class="o">or</span> <span class="nx">rhs</span> <span class="o">not</span> <span class="k">instanceof</span> <span class="nx">Matrix</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: lhs and rhs must be an instance of Matrix&quot;</span>
+        <span class="k">if</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">n</span> <span class="o">isnt</span> <span class="nx">rhs</span><span class="p">.</span><span class="nx">m</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: cannot multiple this two matrix. only matrix pair of M x N and N x L is defined&quot;</span>
+        <span class="nv">newMatrix = </span><span class="p">[]</span>
+        <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">m</span><span class="p">]</span>
+            <span class="nv">row = </span><span class="p">[]</span>
+            <span class="k">for</span> <span class="nx">j</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">rhs</span><span class="p">.</span><span class="nx">n</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span> <span class="nx">sum</span><span class="p">(</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="nx">k</span><span class="p">)</span><span class="o">*</span><span class="nx">rhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span><span class="nx">j</span><span class="p">)</span> <span class="k">for</span> <span class="nx">k</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">n</span><span class="p">])</span>
+            <span class="nx">newMatrix</span><span class="p">.</span><span class="nx">push</span> <span class="nx">row</span>
+        <span class="k">new</span> <span class="nx">Matrix</span> <span class="nx">newMatrix</span>
+    <span class="nv">multiple: </span><span class="nf">(rhs) -&gt;</span>
+        <span class="nx">Matrix</span><span class="p">.</span><span class="nx">multiple</span> <span class="err">@</span><span class="p">,</span> <span class="nx">rhs</span>
+    <span class="vi">@multiple: </span><span class="nf">(lhs, rhs) -&gt;</span>
+        <span class="k">if</span> <span class="k">typeof</span> <span class="nx">lhs</span> <span class="o">isnt</span> <span class="s2">&quot;number&quot;</span> <span class="o">and</span> <span class="k">typeof</span> <span class="nx">rhs</span> <span class="o">isnt</span> <span class="s2">&quot;number&quot;</span>
+            <span class="k">return</span> <span class="nx">@multipleMatrix</span> <span class="nx">lhs</span><span class="p">,</span> <span class="nx">rhs</span>
+        <span class="k">return</span> <span class="nx">@multipleScalar</span> <span class="nx">lhs</span><span class="p">,</span> <span class="nx">rhs</span>
+    <span class="nv">devide: </span><span class="nf">(rhs) -&gt;</span>
+        <span class="nx">Matrix</span><span class="p">.</span><span class="nx">devide</span> <span class="err">@</span><span class="p">,</span> <span class="nx">rhs</span>
+    <span class="vi">@devide: </span><span class="nf">(lhs, rhs) -&gt;</span>
+        <span class="k">if</span> <span class="nx">lhs</span> <span class="k">instanceof</span> <span class="nx">Matrix</span> <span class="o">and</span> <span class="nx">rhs</span> <span class="k">instanceof</span> <span class="nx">Matrix</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: devision of two matrix is not defined&quot;</span>
+        <span class="k">if</span> <span class="k">typeof</span> <span class="nx">rhs</span> <span class="o">isnt</span> <span class="s2">&quot;number&quot;</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: you cannot devide scalar with matrix&quot;</span>
+        <span class="nv">newMatrix = </span><span class="p">[]</span>
+        <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">m</span><span class="p">]</span>
+            <span class="nv">row = </span><span class="p">[]</span>
+            <span class="k">for</span> <span class="nx">j</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">n</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="nx">j</span><span class="p">)</span> <span class="o">/</span> <span class="nx">rhs</span><span class="p">)</span>
+            <span class="nx">newMatrix</span><span class="p">.</span><span class="nx">push</span> <span class="nx">row</span>
+        <span class="k">new</span> <span class="nx">Matrix</span> <span class="nx">newMatrix</span>
+    <span class="nv">power: </span><span class="nf">(k) -&gt;</span>
+        <span class="nx">Matrix</span><span class="p">.</span><span class="nx">power</span> <span class="err">@</span><span class="p">,</span> <span class="nx">k</span>
+    <span class="vi">@power: </span><span class="nf">(matrix, k) -&gt;</span>
+        <span class="k">if</span> <span class="o">not</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">isSquare</span><span class="p">()</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: a power of matrix is not defined except square matrix&quot;</span>
+        <span class="k">switch</span> <span class="nx">k</span>
+            <span class="k">when</span> <span class="mi">0</span> <span class="k">then</span> <span class="k">return</span> <span class="nx">Matrix</span><span class="p">.</span><span class="nx">identify</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">m</span>
+            <span class="k">when</span> <span class="mi">1</span> <span class="k">then</span> <span class="k">return</span> <span class="nx">matrix</span>
+            <span class="k">when</span> <span class="mi">2</span> <span class="k">then</span> <span class="k">return</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">multiple</span> <span class="nx">matrix</span>
+            <span class="k">else</span>
+                <span class="nx">matrix</span><span class="p">.</span><span class="nx">multiple</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">power</span> <span class="nx">k</span><span class="o">-</span><span class="mi">1</span>
+    <span class="nv">resize: </span><span class="nf">(m, n) -&gt;</span>
+        <span class="nx">Matrix</span><span class="p">.</span><span class="nx">resize</span> <span class="err">@</span><span class="p">,</span> <span class="nx">m</span><span class="p">,</span> <span class="nx">n</span>
+    <span class="vi">@resize: </span><span class="nf">(matrix, m, n) -&gt;</span>
+        <span class="nv">newMatrix = </span><span class="p">[]</span>
+        <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">m</span><span class="p">]</span>
+            <span class="nv">row = </span><span class="p">[]</span>
+            <span class="k">for</span> <span class="nx">j</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">n</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="nx">j</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="nx">newMatrix</span><span class="p">.</span><span class="nx">push</span> <span class="nx">row</span>
+        <span class="k">new</span> <span class="nx">Matrix</span> <span class="nx">newMatrix</span>
+    <span class="nv">trace: </span><span class="o">-&gt;</span>
+        <span class="nx">Matrix</span><span class="p">.</span><span class="nx">trace</span> <span class="err">@</span>
+    <span class="vi">@trace: </span><span class="nf">(matrix) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>Return trace of square matrix</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="k">if</span> <span class="o">not</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">isSquare</span><span class="p">()</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: trace of non square matrix is not defined&quot;</span>
+        <span class="nx">sum</span><span class="p">(</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">m</span><span class="p">])</span>
+    <span class="nv">transpose: </span><span class="o">-&gt;</span>
+        <span class="nx">Matrix</span><span class="p">.</span><span class="nx">transpose</span> <span class="err">@</span>
+    <span class="vi">@transpose: </span><span class="nf">(matrix) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>Return transpose matrix</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nv">newMatrix = </span><span class="p">[]</span>
+        <span class="k">for</span> <span class="nx">j</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">n</span><span class="p">]</span>
+            <span class="nv">row = </span><span class="p">[]</span>
+            <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">m</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="p">)</span>
+            <span class="nx">newMatrix</span><span class="p">.</span><span class="nx">push</span> <span class="nx">row</span>
+        <span class="k">new</span> <span class="nx">Matrix</span> <span class="nx">newMatrix</span>
+
+
+    <span class="nv">minor: </span><span class="nf">(i, j) -&gt;</span>
+        <span class="nx">Matrix</span><span class="p">.</span><span class="nx">minor</span> <span class="err">@</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">j</span>
+    <span class="vi">@minor: </span><span class="nf">(matrix, i, j) -&gt;</span>
+        <span class="nv">newMatrix = </span><span class="p">[]</span>
+        <span class="k">for</span> <span class="nx">k</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">i</span><span class="p">]</span>
+            <span class="nv">row = </span><span class="p">[]</span>
+            <span class="k">for</span> <span class="nx">m</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">j</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span> <span class="nx">m</span><span class="p">)</span>
+            <span class="k">for</span> <span class="nx">m</span> <span class="k">in</span> <span class="p">[</span><span class="nx">j</span><span class="o">+</span><span class="mi">1</span><span class="p">...</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">n</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span> <span class="nx">m</span><span class="p">)</span>
+            <span class="nx">newMatrix</span><span class="p">.</span><span class="nx">push</span> <span class="nx">row</span>
+        <span class="k">for</span> <span class="nx">k</span> <span class="k">in</span> <span class="p">[</span><span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">...</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">m</span><span class="p">]</span>
+            <span class="nv">row = </span><span class="p">[]</span>
+            <span class="k">for</span> <span class="nx">m</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">j</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span> <span class="nx">m</span><span class="p">)</span>
+            <span class="k">for</span> <span class="nx">m</span> <span class="k">in</span> <span class="p">[</span><span class="nx">j</span><span class="o">+</span><span class="mi">1</span><span class="p">...</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">n</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span> <span class="nx">m</span><span class="p">)</span>
+            <span class="nx">newMatrix</span><span class="p">.</span><span class="nx">push</span> <span class="nx">row</span>
+        <span class="k">new</span> <span class="nx">Matrix</span> <span class="nx">newMatrix</span>
+    <span class="nv">cofactor: </span><span class="nf">(i, j) -&gt;</span>
+        <span class="nx">Matrix</span><span class="p">.</span><span class="nx">cofactor</span> <span class="err">@</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">j</span>
+    <span class="vi">@cofactor: </span><span class="nf">(matrix, i, j) -&gt;</span>
+        <span class="nv">flag = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="nx">i</span><span class="o">+</span><span class="nx">j</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p>Matrix.minor(matrix, i, j).multiple flag</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nv">newMatrix = </span><span class="p">[]</span>
+        <span class="k">for</span> <span class="nx">k</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">i</span><span class="p">]</span>
+            <span class="nv">row = </span><span class="p">[]</span>
+            <span class="k">for</span> <span class="nx">m</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">j</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span> <span class="nx">flag</span> <span class="o">*</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span> <span class="nx">m</span><span class="p">)</span>
+            <span class="k">for</span> <span class="nx">m</span> <span class="k">in</span> <span class="p">[</span><span class="nx">j</span><span class="o">+</span><span class="mi">1</span><span class="p">...</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">n</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span> <span class="nx">flag</span> <span class="o">*</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span> <span class="nx">m</span><span class="p">)</span>
+            <span class="nx">newMatrix</span><span class="p">.</span><span class="nx">push</span> <span class="nx">row</span>
+        <span class="k">for</span> <span class="nx">k</span> <span class="k">in</span> <span class="p">[</span><span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">...</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">m</span><span class="p">]</span>
+            <span class="nv">row = </span><span class="p">[]</span>
+            <span class="k">for</span> <span class="nx">m</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">j</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span> <span class="nx">flag</span> <span class="o">*</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span> <span class="nx">m</span><span class="p">)</span>
+            <span class="k">for</span> <span class="nx">m</span> <span class="k">in</span> <span class="p">[</span><span class="nx">j</span><span class="o">+</span><span class="mi">1</span><span class="p">...</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">n</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span> <span class="nx">flag</span> <span class="o">*</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span> <span class="nx">m</span><span class="p">)</span>
+            <span class="nx">newMatrix</span><span class="p">.</span><span class="nx">push</span> <span class="nx">row</span>
+        <span class="k">new</span> <span class="nx">Matrix</span> <span class="nx">newMatrix</span>
+    <span class="nv">determinant: </span><span class="o">-&gt;</span>
+        <span class="nx">Matrix</span><span class="p">.</span><span class="nx">determinant</span> <span class="err">@</span>
+    <span class="vi">@determinant: </span><span class="nf">(matrix) -&gt;</span>
+        <span class="k">if</span> <span class="o">not</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">isSquare</span><span class="p">()</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;determinant of non square matrix is not defined&quot;</span>
+        <span class="k">switch</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">m</span>
+            <span class="k">when</span> <span class="mi">1</span> <span class="k">then</span> <span class="k">return</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">when</span> <span class="mi">2</span>
+                <span class="k">return</span> <span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">when</span> <span class="mi">3</span>
+                <span class="nv">a = </span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+                <span class="nv">b = </span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+                <span class="nv">c = </span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+                <span class="nv">d = </span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+                <span class="nv">e = </span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+                <span class="nv">f = </span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">return</span> <span class="nx">a</span><span class="o">+</span><span class="nx">b</span><span class="o">+</span><span class="nx">c</span><span class="o">-</span><span class="nx">d</span><span class="o">-</span><span class="nx">e</span><span class="o">-</span><span class="nx">f</span>
+            <span class="k">else</span>
+                <span class="nv">factor = </span><span class="nf">(i, j) -&gt;</span>
+                    <span class="nv">entry = </span><span class="nx">matrix</span><span class="p">.</span><span class="nx">get</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">j</span>
+                    <span class="nv">cofactor = </span><span class="nx">matrix</span><span class="p">.</span><span class="nx">cofactor</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">j</span>
+                    <span class="k">return</span> <span class="nx">entry</span> <span class="o">*</span> <span class="nx">cofactor</span><span class="p">.</span><span class="nx">determinant</span><span class="p">()</span>
+                <span class="k">return</span> <span class="nx">sum</span><span class="p">(</span><span class="nx">factor</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">matrix</span><span class="p">.</span><span class="nx">m</span><span class="p">])</span>
+        
+    <span class="vi">@zero: </span><span class="nf">(m, n) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <p>Return zero matrix</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nv">newMatrix = </span><span class="p">[]</span>
+        <span class="k">for</span> <span class="nx">j</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">m</span><span class="p">]</span>
+            <span class="nv">row = </span><span class="p">[]</span>
+            <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">n</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span> <span class="mi">0</span>
+            <span class="nx">newMatrix</span><span class="p">.</span><span class="nx">push</span> <span class="nx">row</span>
+        <span class="k">new</span> <span class="nx">Matrix</span> <span class="nx">newMatrix</span>
+    <span class="vi">@identify: </span><span class="nf">(m) -&gt;</span>
+        <span class="nv">matrix = </span><span class="nx">Matrix</span><span class="p">.</span><span class="nx">zero</span> <span class="nx">m</span><span class="p">,</span> <span class="nx">m</span>
+        <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">m</span><span class="p">]</span>
+            <span class="nx">matrix</span><span class="p">.</span><span class="nx">set</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="mi">1</span>
+        <span class="nx">matrix</span>
+<span class="nv">exports.Vector = </span><span class="k">class</span> <span class="nx">Vector</span> <span class="k">extends</span> <span class="nx">Matrix</span>
+    <span class="nv">constructor: </span><span class="nf">(entries...) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <p>for convinience, you can create new Vector with
+the syntax below</p>
+
+<ol>
+<li>vector = Vector 0, 1, 2</li>
+<li>vector = Vector [0, 1, 2]</li>
+</ol>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="k">if</span> <span class="nx">entries</span><span class="p">.</span><span class="nx">length</span> <span class="o">is</span> <span class="mi">1</span> <span class="o">and</span> <span class="nx">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">instanceof</span> <span class="nb">Array</span>
+            <span class="nv">entries = </span><span class="nx">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="nx">entries</span><span class="p">.</span><span class="nx">length</span> <span class="o">is</span> <span class="mi">1</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: it is not vector but scalar&quot;</span>
+        <span class="k">super</span> <span class="p">[</span><span class="nx">entries</span><span class="p">]</span>
+
+    <span class="nx">@get</span> <span class="s1">&#39;values&#39;</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="nx">@row</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="nx">@get</span> <span class="s1">&#39;dimension&#39;</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="nx">@n</span></pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <p>for convinience, now get and set function has default i</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">get: </span><span class="nf">(i, j, def=null) -&gt;</span>
+        <span class="k">if</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">is</span> <span class="mi">1</span>
+            <span class="nv">j = </span><span class="nx">i</span>
+            <span class="nv">i = </span><span class="mi">0</span>
+        <span class="k">super</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="p">,</span> <span class="nx">def</span>
+    <span class="nv">set: </span><span class="nf">(i, j, value=null) -&gt;</span>
+        <span class="k">if</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">is</span> <span class="mi">2</span>
+            <span class="nv">value = </span><span class="nx">j</span>
+            <span class="nv">j = </span><span class="nx">i</span>
+            <span class="nv">i = </span><span class="mi">0</span>
+        <span class="k">super</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">j</span><span class="p">,</span> <span class="nx">value</span></pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-12">&#182;</a>               </div>               <p>for convinience, you can access entries with attribute
+'x', 'y' and 'z' if dimension is 2 or 3</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">@get</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="o">-&gt;</span> 
+        <span class="k">if</span> <span class="nx">@dimension</span> <span class="o">&lt;=</span> <span class="mi">3</span>
+            <span class="k">return</span> <span class="nx">@get</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: shortcut property is not available on this vector&quot;</span>
+    <span class="nx">@get</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="o">-&gt;</span> 
+        <span class="k">if</span> <span class="nx">@dimension</span> <span class="o">&lt;=</span> <span class="mi">3</span>
+            <span class="k">return</span> <span class="nx">@get</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: shortcut property is not available on this vector&quot;</span>
+    <span class="nx">@get</span> <span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="o">-&gt;</span>
+        <span class="k">if</span> <span class="nx">@dimension</span> <span class="o">is</span> <span class="mi">3</span>
+            <span class="k">return</span> <span class="nx">@get</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: shortcut property is not available on this vector&quot;</span>
+    <span class="nx">@set</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="nf">(value) -&gt;</span> 
+        <span class="k">if</span> <span class="nx">@dimension</span> <span class="o">&lt;=</span> <span class="mi">3</span>
+            <span class="nx">@set</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span>
+        <span class="k">else</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: shortcut property is not available on this vector&quot;</span>
+    <span class="nx">@set</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="nf">(value) -&gt;</span> 
+        <span class="k">if</span> <span class="nx">@dimension</span> <span class="o">&lt;=</span> <span class="mi">3</span>
+            <span class="nx">@set</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span>
+        <span class="k">else</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: shortcut property is not available on this vector&quot;</span>
+    <span class="nx">@set</span> <span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="nf">(value) -&gt;</span>
+        <span class="k">if</span> <span class="nx">@dimension</span> <span class="o">is</span> <span class="mi">3</span>
+            <span class="nx">@set</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span>
+        <span class="k">else</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: shortcut property is not available on this vector&quot;</span>
+
+
+    <span class="nv">dot: </span><span class="nf">(rhs) -&gt;</span>
+        <span class="nx">Vector</span><span class="p">.</span><span class="nx">dot</span> <span class="err">@</span><span class="p">,</span> <span class="nx">rhs</span>
+    <span class="nv">cross: </span><span class="nf">(rhs) -&gt;</span>
+        <span class="nx">Vector</span><span class="p">.</span><span class="nx">cross</span> <span class="err">@</span><span class="p">,</span> <span class="nx">rhs</span>
+    <span class="nv">outer: </span><span class="nf">(rhs) -&gt;</span>
+        <span class="nx">Vector</span><span class="p">.</span><span class="nx">outer</span> <span class="err">@</span><span class="p">,</span> <span class="nx">rhs</span>
+    <span class="nv">exterior: </span><span class="nf">(rhs) -&gt;</span>
+        <span class="nx">Vector</span><span class="p">.</span><span class="nx">exterior</span> <span class="err">@</span><span class="p">,</span> <span class="nx">rhs</span>
+
+    <span class="vi">@dot: </span><span class="nf">(lhs, rhs) -&gt;</span>
+        <span class="k">if</span> <span class="nx">lhs</span> <span class="o">not</span> <span class="k">instanceof</span> <span class="nx">Vector</span> <span class="o">or</span> <span class="nx">rhs</span> <span class="o">not</span> <span class="k">instanceof</span> <span class="nx">Vector</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: lhs and rhs must be an instance of Vector for dot product&quot;</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">dimension</span> <span class="o">isnt</span> <span class="nx">rhs</span><span class="p">.</span><span class="nx">dimension</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: cannot dot product between two different dimensional vector&quot;</span>
+        <span class="nx">sum</span><span class="p">(</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span><span class="o">*</span><span class="nx">rhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">dimension</span><span class="p">])</span></pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-13">&#182;</a>               </div>               <p>Code that using transpose method is below
+result = lhs.multiple rhs.transpose()
+return result.get(0, 0)</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="vi">@cross: </span><span class="nf">(lhs, rhs) -&gt;</span>
+        <span class="k">if</span> <span class="nx">lhs</span> <span class="o">not</span> <span class="k">instanceof</span> <span class="nx">Vector</span> <span class="o">or</span> <span class="nx">rhs</span> <span class="o">not</span> <span class="k">instanceof</span> <span class="nx">Vector</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: lhs and rhs must be an instance of Vector for cross product&quot;</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">dimension</span> <span class="o">isnt</span> <span class="nx">rhs</span><span class="p">.</span><span class="nx">dimension</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: cannot cross product between two different dimensional vector&quot;</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">dimension</span> <span class="o">&gt;</span> <span class="mi">3</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: cross product is not defined except the dimension of vector is 3&quot;</span>
+        <span class="k">new</span> <span class="nx">Vector</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">y</span><span class="o">*</span><span class="nx">rhs</span><span class="p">.</span><span class="nx">z</span><span class="o">-</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">z</span><span class="o">*</span><span class="nx">rhs</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">z</span><span class="o">*</span><span class="nx">rhs</span><span class="p">.</span><span class="nx">x</span><span class="o">-</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">x</span><span class="o">*</span><span class="nx">rhs</span><span class="p">.</span><span class="nx">z</span><span class="p">,</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">x</span><span class="o">*</span><span class="nx">rhs</span><span class="p">.</span><span class="nx">y</span><span class="o">-</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">y</span><span class="o">*</span><span class="nx">rhs</span><span class="p">.</span><span class="nx">x</span>
+        
+    <span class="vi">@outer: </span><span class="nf">(lhs, rhs) -&gt;</span>
+        <span class="k">if</span> <span class="nx">lhs</span> <span class="o">not</span> <span class="k">instanceof</span> <span class="nx">Vector</span> <span class="o">or</span> <span class="nx">rhs</span> <span class="o">not</span> <span class="k">instanceof</span> <span class="nx">Vector</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: lhs and rhs must be an instance of Vector for outer product&quot;</span>
+        <span class="nv">newMatrix = </span><span class="p">[]</span>
+        <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">dimension</span><span class="p">]</span>
+            <span class="nv">row = </span><span class="p">[]</span>
+            <span class="k">for</span> <span class="nx">j</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">rhs</span><span class="p">.</span><span class="nx">dimension</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span><span class="o">*</span><span class="nx">rhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">j</span><span class="p">)</span>
+            <span class="nx">newMatrix</span><span class="p">.</span><span class="nx">push</span> <span class="nx">row</span>
+        <span class="k">new</span> <span class="nx">Matrix</span> <span class="nx">newMatrix</span></pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <p>Code that using transpose method is below
+return lhs.transpose().multiple rhs</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="vi">@exterior: </span><span class="nf">(lhs, rhs) -&gt;</span>
+        <span class="k">if</span> <span class="nx">lhs</span> <span class="o">not</span> <span class="k">instanceof</span> <span class="nx">Vector</span> <span class="o">or</span> <span class="nx">rhs</span> <span class="o">not</span> <span class="k">instanceof</span> <span class="nx">Vector</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: lhs and rhs must be an instance of Vector for exterior product&quot;</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">dimension</span> <span class="o">isnt</span> <span class="nx">rhs</span><span class="p">.</span><span class="nx">dimension</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="s2">&quot;error: cannot exterior product between two different dimensional vector&quot;</span>
+        <span class="nv">newMatrix = </span><span class="p">[]</span>
+        <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">dimension</span><span class="p">]</span>
+            <span class="nv">row = </span><span class="p">[]</span>
+            <span class="k">for</span> <span class="nx">j</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">rhs</span><span class="p">.</span><span class="nx">dimension</span><span class="p">]</span>
+                <span class="nx">row</span><span class="p">.</span><span class="nx">push</span> <span class="nx">lhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span><span class="o">*</span><span class="nx">rhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">j</span><span class="p">)</span> <span class="o">-</span> <span class="nx">rhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span><span class="o">*</span><span class="nx">lhs</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">j</span><span class="p">)</span>
+            <span class="nx">newMatrix</span><span class="p">.</span><span class="nx">push</span> <span class="nx">row</span>
+        <span class="k">new</span> <span class="nx">Matrix</span> <span class="nx">newMatrix</span></pre></div>             </td>           </tr>                               <tr id="section-15">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-15">&#182;</a>               </div>               <p>Code that using outer method is below
+lhs.outer(rhs).minus rhs.outer lhs</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
