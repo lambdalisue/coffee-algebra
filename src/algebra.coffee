@@ -307,6 +307,9 @@ exports.Vector = class Vector extends Matrix
 
     @get 'values', -> @row(0)
     @get 'dimension', -> @n
+    @get 'norm', ->
+        # TODO: Write test
+        Math.sqrt @dot @
 
     # for convinience, now get and set function has default i
     get: (i, j, def=null) ->
@@ -351,16 +354,8 @@ exports.Vector = class Vector extends Matrix
         else
             throw new Error "error: shortcut property is not available on this vector"
 
-
     dot: (rhs) ->
         Vector.dot @, rhs
-    cross: (rhs) ->
-        Vector.cross @, rhs
-    outer: (rhs) ->
-        Vector.outer @, rhs
-    exterior: (rhs) ->
-        Vector.exterior @, rhs
-
     @dot: (lhs, rhs) ->
         if lhs not instanceof Vector or rhs not instanceof Vector
             throw new Error "error: lhs and rhs must be an instance of Vector for dot product"
@@ -371,15 +366,30 @@ exports.Vector = class Vector extends Matrix
         # result = lhs.multiple rhs.transpose()
         # return result.get(0, 0)
 
+    cross: (rhs) ->
+        Vector.cross @, rhs
     @cross: (lhs, rhs) ->
+        # TODO: write test
         if lhs not instanceof Vector or rhs not instanceof Vector
             throw new Error "error: lhs and rhs must be an instance of Vector for cross product"
         else if lhs.dimension isnt rhs.dimension
             throw new Error "error: cannot cross product between two different dimensional vector"
         else if lhs.dimension > 3
-            throw new Error "error: cross product is not defined except the dimension of vector is 3"
-        new Vector lhs.y*rhs.z-lhs.z*rhs.y, lhs.z*rhs.x-lhs.x*rhs.z, lhs.x*rhs.y-lhs.y*rhs.x
+            throw new Error "error: cross product is not defined except the dimension of vector is 2 or 3"
+        switch lhs.dimension
+            when 2
+                # Actually cross product of dimension 2 is not defined in math
+                # but it is very useful for detecting vector direction even in
+                # 2nd dimension; if A is on right side of V, AxB < 0 in 2nd
+                # dimension; that's why in this method, cross product of 2nd
+                # dimension is calculated as exterior and make the matrix to
+                # pesudo-scalar (0 rank pesudo-tensor) via hodge star operator
+                return lhs.x*rhs.y-lhs.y*rhs.x
+            when 3
+                new Vector lhs.y*rhs.z-lhs.z*rhs.y, lhs.z*rhs.x-lhs.x*rhs.z, lhs.x*rhs.y-lhs.y*rhs.x
         
+    outer: (rhs) ->
+        Vector.outer @, rhs
     @outer: (lhs, rhs) ->
         if lhs not instanceof Vector or rhs not instanceof Vector
             throw new Error "error: lhs and rhs must be an instance of Vector for outer product"
@@ -392,6 +402,9 @@ exports.Vector = class Vector extends Matrix
         new Matrix newMatrix
         # Code that using transpose method is below
         # return lhs.transpose().multiple rhs
+
+    exterior: (rhs) ->
+        Vector.exterior @, rhs
     @exterior: (lhs, rhs) ->
         if lhs not instanceof Vector or rhs not instanceof Vector
             throw new Error "error: lhs and rhs must be an instance of Vector for exterior product"

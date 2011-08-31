@@ -713,4 +713,8 @@ exports.testMatrixDeterminant = (test) ->
     expected = 39
     assert.equal Matrix.determinant(matrix), expected
 
+    a = new algebra.Vector [1, 2]
+    b = new algebra.Vector [3, 4]
+    console.log a.exterior b
+
     test.done()
